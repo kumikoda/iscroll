@@ -171,7 +171,7 @@ var m = Math,
 
 		if (that.options.useTransition) that.options.fixedScrollbar = true;
 
-		that.refresh();
+		that._refresh();
 
 		that._bind(RESIZE_EV, window);
 		that._bind(START_EV);
@@ -219,7 +219,7 @@ iScroll.prototype = {
 		if (this.moved || this.zoomed || this.animating ||
 			(this.scrollerW == this.scroller.offsetWidth * this.scale && this.scrollerH == this.scroller.offsetHeight * this.scale)) return;
 
-		this.refresh();
+		this._refresh();
 	},
 	
 	_scrollbar: function (dir) {
@@ -281,7 +281,7 @@ iScroll.prototype = {
 	
 	_resize: function () {
 		var that = this;
-		setTimeout(function () { that.refresh(); }, isAndroid ? 200 : 0);
+		setTimeout(function () { that._refresh(); }, isAndroid ? 200 : 0);
 	},
 	
 	_pos: function (x, y) {
@@ -526,7 +526,7 @@ iScroll.prototype = {
 			that.scroller.style[transform] = 'translate(' + that.x + 'px,' + that.y + 'px) scale(' + that.scale + ')' + translateZ;
 			
 			that.zoomed = false;
-			that.refresh();
+			that._refresh();
 
 			if (that.options.onZoomEnd) that.options.onZoomEnd.call(that, e);
 			return;
@@ -866,43 +866,7 @@ iScroll.prototype = {
 		(el || this.scroller).removeEventListener(type, this, !!bubble);
 	},
 
-
-	/**
-	*
-	* Public methods
-	*
-	*/
-	destroy: function () {
-		var that = this;
-
-		that.scroller.style[transform] = '';
-
-		// Remove the scrollbars
-		that.hScrollbar = false;
-		that.vScrollbar = false;
-		that._scrollbar('h');
-		that._scrollbar('v');
-
-		// Remove the event listeners
-		that._unbind(RESIZE_EV, window);
-		that._unbind(START_EV);
-		that._unbind(MOVE_EV, window);
-		that._unbind(END_EV, window);
-		that._unbind(CANCEL_EV, window);
-		
-		if (!that.options.hasTouch) {
-			that._unbind('DOMMouseScroll');
-			that._unbind('mousewheel');
-		}
-		
-		if (that.options.useTransition) that._unbind(TRNEND_EV);
-		
-		if (that.options.checkDOMChanges) clearInterval(that.checkDOMTime);
-		
-		if (that.options.onDestroy) that.options.onDestroy.call(that);
-	},
-
-	refresh: function () {
+	_refresh: function () {
 		var that = this,
 			offset,
 			i, l,
@@ -975,6 +939,45 @@ iScroll.prototype = {
 			that._resetPos(400);
 		}
 	},
+
+	/**
+	*
+	* Public methods
+	*
+	*/
+	destroy: function () {
+		var that = this;
+
+		that.scroller.style[transform] = '';
+
+		// Remove the scrollbars
+		that.hScrollbar = false;
+		that.vScrollbar = false;
+		that._scrollbar('h');
+		that._scrollbar('v');
+
+		// Remove the event listeners
+		that._unbind(RESIZE_EV, window);
+		that._unbind(START_EV);
+		that._unbind(MOVE_EV, window);
+		that._unbind(END_EV, window);
+		that._unbind(CANCEL_EV, window);
+		
+		if (!that.options.hasTouch) {
+			that._unbind('DOMMouseScroll');
+			that._unbind('mousewheel');
+		}
+		
+		if (that.options.useTransition) that._unbind(TRNEND_EV);
+		
+		if (that.options.checkDOMChanges) clearInterval(that.checkDOMTime);
+		
+		if (that.options.onDestroy) that.options.onDestroy.call(that);
+	},
+
+	refresh: function(){
+		setTimeout(this._refresh, 0);
+	}
 
 	scrollTo: function (x, y, time, relative) {
 		var that = this,
@@ -1074,7 +1077,7 @@ iScroll.prototype = {
 		that.y = y - y * relScale + that.y;
 
 		that.scale = scale;
-		that.refresh();
+		that._refresh();
 
 		that.x = that.x > 0 ? 0 : that.x < that.maxScrollX ? that.maxScrollX : that.x;
 		that.y = that.y > that.minScrollY ? that.minScrollY : that.y < that.maxScrollY ? that.maxScrollY : that.y;
